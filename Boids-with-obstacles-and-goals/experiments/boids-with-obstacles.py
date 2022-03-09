@@ -37,21 +37,24 @@ all_sprites_list = pygame.sprite.LayeredDirty()
 
 # Place boids
 for i in range(NUM_BOIDS):
-    boid = Boid(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT),
+    boid = Boid(random.randint(0, int(SCREEN_WIDTH/5)), random.randint(int(SCREEN_HEIGHT*2/5), int(SCREEN_HEIGHT*3/5)),
                 100, 40, 5, 10, 100, 60, MAX_BOID_SPEED, "experiments/resources/img/boid.png")
     # Add the boid to the lists of objects
     boid_list.add(boid)
     all_sprites_list.add(boid)
 
 # Place obstacles
-for i in range(NUM_OBSTACLES):
-    obstacle = Obstacle(random.randint(0 + BORDER, SCREEN_WIDTH - BORDER),
-                        random.randint(0 + BORDER, SCREEN_HEIGHT - BORDER))
-    # Add the obstacle to the lists of objects
-    obstacle_list.add(obstacle)
-    all_sprites_list.add(obstacle)
+# for i in range(NUM_OBSTACLES):
+#     obstacle = Obstacle(random.randint(0 + BORDER, SCREEN_WIDTH - BORDER),
+#                         random.randint(0 + BORDER, SCREEN_HEIGHT - BORDER))
+#     # Add the obstacle to the lists of objects
+#     obstacle_list.add(obstacle)
+#     all_sprites_list.add(obstacle)
 
-    
+# Specific obstacle in middle of the map
+center_obstacle = Obstacle(SCREEN_WIDTH/2, SCREEN_HEIGHT*0.925/2)
+obstacle_list.add(center_obstacle)
+all_sprites_list.add(center_obstacle)
 clock = pygame.time.Clock()
 running = True
 
@@ -103,7 +106,8 @@ while running:
         if len(visible_obstacles) > 0:
             for obstacle in visible_obstacles:
 				boid.obstacle_avoidance(obstacle)
-        boid.goal(mouse_x, mouse_y)
+        # boid.goal(mouse_x, mouse_y)
+        boid.goal(SCREEN_WIDTH, SCREEN_HEIGHT/2)
         boid.update(False)
 
     # Check for collisions
@@ -121,7 +125,7 @@ while running:
     # Go ahead and update the screen with what we've drawn.
     pygame.display.update(rects)
     # Used to manage how fast the screen updates
-    clock.tick(60)
+    clock.tick(30)
 
 # --- the end ---
 pygame.quit()
