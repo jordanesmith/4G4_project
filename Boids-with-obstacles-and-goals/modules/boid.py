@@ -53,7 +53,28 @@ class Boid(pygame.sprite.DirtySprite):
 
         dist = (self.rect.x - other.rect.x, self.rect.y - other.rect.y)
         return math.sqrt(dist[0] ** 2 + dist[1] ** 2)
+    
+    '''
+    Return the displacement from another sprite.
+    '''
+    def displacement(self, other):
+        if not other:
+            return -1
+        
+        return (self.rect.x - other.rect.x, self.rect.y - other.rect.y)
 
+    '''
+    Return the relative drag from incident velocity difference caused by the other boid
+    '''
+    def drag(self, otherboid):
+        
+        dis_x, dis_y = self.displacement(otherboid)
+        
+        if dis_x <= 0 :
+            return math.exp(- abs(dis_x/60)) * ( 1 / (1 + math.exp(abs(dis_y) - 5)) ) 
+        else:
+            return 0
+    
     '''
     Boids want to stay close to each other, have them move towards the center of mass of the flock.
 

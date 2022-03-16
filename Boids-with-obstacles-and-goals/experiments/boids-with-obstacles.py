@@ -8,12 +8,14 @@ import sys, os.path as path
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 from modules.boid import *
 from modules.obstacle import *
+import numpy as np
 
 # === main ===
 
 # --- init ---
 
 pygame.init()
+random.seed(1)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), flags)
 
@@ -37,19 +39,11 @@ all_sprites_list = pygame.sprite.LayeredDirty()
 
 # Place boids
 for i in range(NUM_BOIDS):
-    boid = Boid(random.randint(0, int(SCREEN_WIDTH/5)), random.randint(int(SCREEN_HEIGHT*2/5), int(SCREEN_HEIGHT*3/5)),
+    boid = Boid(random.randint(0, int(SCREEN_WIDTH/5)), random.randint(int(SCREEN_HEIGHT*2.2/5), int(SCREEN_HEIGHT*2.8/5)),
                 100, 40, 5, 10, 100, 60, MAX_BOID_SPEED, "experiments/resources/img/boid.png")
     # Add the boid to the lists of objects
     boid_list.add(boid)
     all_sprites_list.add(boid)
-
-# Place obstacles
-# for i in range(NUM_OBSTACLES):
-#     obstacle = Obstacle(random.randint(0 + BORDER, SCREEN_WIDTH - BORDER),
-#                         random.randint(0 + BORDER, SCREEN_HEIGHT - BORDER))
-#     # Add the obstacle to the lists of objects
-#     obstacle_list.add(obstacle)
-#     all_sprites_list.add(obstacle)
 
 # Specific obstacle in middle of the map
 center_obstacle = Obstacle(SCREEN_WIDTH/2, SCREEN_HEIGHT*0.925/2)
@@ -85,6 +79,9 @@ while running:
 
     # Scan for boids and obstacles to pay attention to
     for boid in boid_list:
+        boid.image = pygame.image.load("experiments/resources/img/boid.png").convert_alpha()
+    
+    for boid in boid_list:
         closeboid = []
         visible_obstacles = []
         avoid = False
@@ -92,8 +89,17 @@ while running:
             if otherboid == boid:
                 continue
             distance = boid.distance(otherboid)
+            drag_coefficient = boid.drag(otherboid)
+            if drag_coefficient != 0:
+                
+                surface_in_wake = boid.image
+                # print(round(drag_coefficient,5))
+                surface_in_wake.set_alpha( max( 50, surface_in_wake.get_alpha() - 255 * drag_coefficient) )                    
+                boid.image = surface_in_wake
             if distance < boid.field_of_view:
                 closeboid.append(otherboid)
+                
+                
         for obstacle in obstacle_list:
             distance = boid.distance(obstacle)
             if distance <= boid.field_of_view:
@@ -121,11 +127,11 @@ while running:
     # --- draws ---
 
     # Create list of dirty rects
-    rects = all_sprites_list.draw(screen)
+    rects = all_sprites_list.draw(screen) 
     # Go ahead and update the screen with what we've drawn.
     pygame.display.update(rects)
     # Used to manage how fast the screen updates
-    clock.tick(30)
+    clock.tick(10)
 
 # --- the end ---
 pygame.quit()
